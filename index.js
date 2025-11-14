@@ -55,10 +55,8 @@ async function run() {
     // add new food 
     app.post("/foods", async (req, res) => {
       const newFood = req.body;
-      console.log("🆕 Received new food:", newFood);
       newFood.food_status = "Available";
       const result = await foodsCollection.insertOne(newFood);
-      console.log("✅ Insert result:", result);
       res.send(result);
     });
 
