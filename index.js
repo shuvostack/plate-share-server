@@ -164,6 +164,45 @@ async function run() {
       const result = await requestsCollection.deleteOne(query);
       res.send(result);
     });
+
+
+    // --------users related apis--------
+
+    // create user
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+
+      const email = req.body.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        res.send({ message: "user already exist" });
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    // get all user
+    app.get("/users", async (req, res) => {
+      const result = await usersCollection.find().toArray();
+      res.send(result);
+    });
+
+    // get single user by email
+    app.get("/users/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await usersCollection.findOne({ email });
+      res.send(result);
+    });
+
+    // delete user
+    app.delete("/users/:email", async (req, res) => {
+      const query = { email: req.params.email };
+      const result = await usersCollection.deleteOne(query);
+      res.send(result);
+    });
+
     
     // await client.db("admin").command({ ping: 1 });
     console.log(
