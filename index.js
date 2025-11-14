@@ -99,7 +99,71 @@ async function run() {
     });
 
    
+// ----------Request system apis----------
 
+    // create food request
+    app.post("/requests", async (req, res) => {
+      const requestData = req.body;
+      requestData.status = "pending";
+      const result = await requestsCollection.insertOne(requestData);
+      res.send(result);
+    });
+
+    // get all request for a specific food (for food Owner)
+    app.get("/requests/:foodId", async (req, res) => {
+      const foodId = req.params.foodId;
+      const result = await requestsCollection
+        .find({ foodId: foodId })
+        .toArray();
+      res.send(result);
+    });
+
+    //3. Get all requests for a specific user (for my requests page)
+    app.get("/my-requests/:email", async (req, res) => {
+      const email = req.params.email;
+      const result = await requestsCollection
+        .find({ requesterEmail: email })
+        .toArray();
+      res.send(result);
+    });
+
+    //4. Accept a request (food owner action)
+    app.patch("/requests/accept/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const request = await requestsCollection.findOne(query);
+      const update = {
+        $set: { status: "accepted" },
+      };
+      const updateRequest = await requestsCollection.updateOne(query, update);
+
+      const foodId = { _id: new ObjectId(request.foodId) };
+      const foodUpdate = {
+        $set: { food_status: "Donated" },
+      };
+      const updateFood = await foodsCollection.updateOne(foodId, foodUpdate);
+
+      res.send({ updateRequest, updateFood });
+    });
+
+    //5. Reject a request (food owner action)
+    app.patch("/requests/reject/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: { status: "rejected" },
+      };
+      const result = await requestsCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    // 6. Cancel a request (delete)
+    app.delete("/requests/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await requestsCollection.deleteOne(query);
+      res.send(result);
+    });
     
     // await client.db("admin").command({ ping: 1 });
     console.log(
