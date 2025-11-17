@@ -23,7 +23,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("plateShare_db");
     const foodsCollection = db.collection("foods");
@@ -107,7 +107,7 @@ async function run() {
       res.send(result);
     });
 
-    // get all request for a specific food (for food Owner)
+    // get all request for a specific food 
     app.get("/requests/:foodId", async (req, res) => {
       const foodId = req.params.foodId;
       const result = await requestsCollection
@@ -141,7 +141,18 @@ async function run() {
       };
       const updateFood = await foodsCollection.updateOne(foodId, foodUpdate);
 
-      res.send({ updateRequest, updateFood });
+      if (updateRequest.modifiedCount > 0 && updateFood.modifiedCount > 0) {
+        res.send({
+          success: true,
+          message: "Request accepted successfully"
+        })
+      }
+      else{
+        res.send({
+          success: false,
+          message: "Something went wrong"
+        })
+      }
     });
 
     //5. Reject a request (food owner action)
