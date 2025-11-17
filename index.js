@@ -125,21 +125,32 @@ async function run() {
 
     //4. Accept a request (food owner action)
     app.patch("/requests/accept/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const request = await requestsCollection.findOne(query);
-      const update = {
-        $set: { status: "accepted" },
-      };
-      const updateRequest = await requestsCollection.updateOne(query, update);
+      try {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) };
+        const request = await requestsCollection.findOne(query);
 
-      const foodId = { _id: new ObjectId(request.foodId) };
-      const foodUpdate = {
-        $set: { food_status: "Donated" },
-      };
-      const updateFood = await foodsCollection.updateOne(foodId, foodUpdate);
+        if (!request) {
+          return res
+            .status(404)
+            .send({ success: false, message: "Request not found" });
+        }
 
-      res.send({ updateRequest, updateFood });
+        await requestsCollection.updateOne(query, {
+          $set: { status: "accepted" },
+        });
+        await foodsCollection.updateOne(
+          { _id: new ObjectId(request.foodId) },
+          { $set: { food_status: "Donated" } }
+        );
+
+        res.send({ success: true, message: "Request accepted successfully" });
+      } catch (err) {
+        console.error(err);
+        res
+          .status(500)
+          .send({ success: false, message: "Something went wrong" });
+      }
     });
 
     //5. Reject a request (food owner action)
