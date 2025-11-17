@@ -6,7 +6,6 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const port = process.env.PORT || 3000;
 
-
 // middleware
 app.use(cors());
 app.use(express.json());
@@ -52,7 +51,7 @@ async function run() {
       res.send(result);
     });
 
-    // add new food 
+    // add new food
     app.post("/foods", async (req, res) => {
       const newFood = req.body;
       newFood.food_status = "Available";
@@ -68,7 +67,7 @@ async function run() {
       res.send(result);
     });
 
-    // Update food 
+    // Update food
     app.patch("/foods/:id", async (req, res) => {
       const id = req.params.id;
       const updatedFood = req.body;
@@ -96,8 +95,7 @@ async function run() {
       res.send(result);
     });
 
-   
-// ----------Request system apis----------
+    // ----------Request system apis----------
 
     // create food request
     app.post("/requests", async (req, res) => {
@@ -107,7 +105,7 @@ async function run() {
       res.send(result);
     });
 
-    // get all request for a specific food 
+    // get all request for a specific food
     app.get("/requests/:foodId", async (req, res) => {
       const foodId = req.params.foodId;
       const result = await requestsCollection
@@ -141,18 +139,7 @@ async function run() {
       };
       const updateFood = await foodsCollection.updateOne(foodId, foodUpdate);
 
-      if (updateRequest.modifiedCount > 0 && updateFood.modifiedCount > 0) {
-        res.send({
-          success: true,
-          message: "Request accepted successfully"
-        })
-      }
-      else{
-        res.send({
-          success: false,
-          message: "Something went wrong"
-        })
-      }
+      res.send({ updateRequest, updateFood });
     });
 
     //5. Reject a request (food owner action)
@@ -173,7 +160,6 @@ async function run() {
       const result = await requestsCollection.deleteOne(query);
       res.send(result);
     });
-
 
     // --------users related apis--------
 
@@ -212,7 +198,6 @@ async function run() {
       res.send(result);
     });
 
-    
     // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
